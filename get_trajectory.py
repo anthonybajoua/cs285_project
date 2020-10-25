@@ -1,7 +1,12 @@
+import pandas as pd
+import numpy as np
+
 def get_traj(df, incl):
     #Initialize all our relevant dictionaries
-    states, actions, idx_to_lex , lex_to_idx = {}, {}, {}, {}
-
+    states = {}
+    actions = {}
+    idx_to_lex = {}
+    lex_to_idx = {}
 
 
     i = 0
@@ -19,8 +24,6 @@ def get_traj(df, incl):
     min_sess = df.groupby('user_id').min().loc[:, 'session']
 
 
-    states, actions = {}, {}
-
 
     itr = max_sess.items()
     itr2 = min_sess.items()
@@ -33,8 +36,10 @@ def get_traj(df, incl):
 
             if usr != usr2:
                 throw("Error")
+
+
+            sessions =  int(mx - mn)
             
-            usr, sessions = int(usr), int(mx - mn)
             states[usr] = np.zeros((sessions + 1, len(incl) * 3))
             actions[usr] = np.zeros((sessions + 1, len(incl)))
         except:
@@ -49,6 +54,7 @@ def get_traj(df, incl):
         
         c = lex_to_idx[lex]
         c_s = c * 3
+
         
         states[usr][0, c_s] = h_seen
         states[usr][0, c_s+1] = h_corr
