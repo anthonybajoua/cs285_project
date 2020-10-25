@@ -159,12 +159,12 @@ class MLPPolicyPG(MLPPolicy):
 
             ## TODO: use the `forward` method of `self.baseline` to get baseline predictions
             baseline_predictions = torch.squeeze(self.baseline.forward(observations))
-            
+
             ## avoid any subtle broadcasting bugs that can arise when dealing with arrays of shape
             ## [ N ] versus shape [ N x 1 ]
             ## HINT: you can use `squeeze` on torch tensors to remove dimensions of size 1
             assert baseline_predictions.shape == targets.shape
-            
+
             # TODO: compute the loss that should be optimized for training the baseline MLP (`self.baseline`)
             # HINT: use `F.mse_loss`
             baseline_loss = F.mse_loss(targets, baseline_predictions)
@@ -199,8 +199,8 @@ class MLPPolicyAC(MLPPolicy):
     def update(self, observations, actions, adv_n=None):
         # TODO: update the policy and return the loss
         observations = ptu.from_numpy(observations)
-        actions = ptu.from_numpy(actions)    
-        adv_n = ptu.from_numpy(adv_n)    
+        actions = ptu.from_numpy(actions)
+        adv_n = ptu.from_numpy(adv_n)
 
         logits = self.forward(observations)
         prob = logits.log_prob(actions)
@@ -211,3 +211,25 @@ class MLPPolicyAC(MLPPolicy):
         self.optimizer.step()
 
         return loss.item()
+
+class MLPPolicySL(MLPPolicy):
+    def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
+        super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
+        self.loss = nn.MSELoss()
+
+    def update(
+            self, observations, actions,
+            adv_n=None, acs_labels_na=None, qvals=None
+    ):
+        # TODO: update the policy and return the loss
+        tobservations = torch.from_numpy(observations).to(torch.float32)
+        result_ac = self.forward(tobservations)
+        # pdb.set_trace()
+        loss = self.loss(result_ac, torch.from_numpy(actions).to(torch.float32))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        return {
+            # You can add extra logging information here, but keep this line
+            'Training Loss': ptu.to_numpy(loss),
+        }
