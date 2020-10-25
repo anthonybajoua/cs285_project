@@ -1,29 +1,31 @@
 import pandas as pd
 import numpy as np
 
+
+
 def timestamp_to_session(x):
-    result = pd.DataFrame()
-    
-    timestamps_sorted = np.unique(np.array(x['timestamp']))
-    timestamps_sorted.sort()
-    
-    
-    result['timestamp'] = timestamps_sorted
-    result['session'] = np.arange(len(timestamps_sorted), dtype=np.uint16)
-    return result
+	result = pd.DataFrame()
+	timestamps_sorted = np.unique(np.array(x['timestamp']))
+	timestamps_sorted.sort()
+	result['timestamp'] = timestamps_sorted
+	result['session'] = np.arange(len(timestamps_sorted), dtype=np.uint16)
+	return result
 
 
 def reduce_df(data):
     """
     Reduces dataframes column types to least bits necesarry.
     """
+    idx = data.index[0]
     for c in data.columns:
-        if type(df.loc[0, c]) != str:
-            data.loc[:, c] = pd.to_numeric(data[c], downcast='unsigned')
+        if type(data.loc[idx, c]) != str:
+            data.loc[:, c] = pd.to_numeric(data.loc[:, c], downcast='unsigned')
             
             
 def assign_colstring_to_num(df, col):
-    
+    '''
+    Takes values in a column and maps them to 0,1 values.
+    '''
     id_tbl = pd.DataFrame()
     
     id_tbl.loc[:, col] = df.loc[:, col]
@@ -35,17 +37,19 @@ def assign_colstring_to_num(df, col):
 
 
 def process_original():
+	'''
+	Duolingo RL data preprocessing
+	'''
 	lang_map = {'de' : 0, 'en': 1, 'es': 2, 'fr': 3, 'it': 4, 'pt': 5}
 
 	df = pd.read_csv("data/settles.acl16.learning_traces.13m.csv")
 
-
-	#Hash strings and map languages to numbers
+	#Map user id's and lexeme id's to integer values.
 	assign_colstring_to_num(df, 'user_id')
 	assign_colstring_to_num(df, 'lexeme_id')
 
 
-
+	#Matp learning and ui language to integer values
 	df['learning_language'] = df['learning_language'].map(lang_map)
 	df['ui_language'] = df['ui_language'].map(lang_map)
 
@@ -57,7 +61,7 @@ def process_original():
 	lex_map.to_csv("data/lexeme_map.csv", index=False)
 	lex_map=None
 	#Trim our dataframe
-	df = df.drop(["p_recall", "lexeme_string"], axis=1)
+	df = df.drop(["p_recall", "lexeme_string", "delta"], axis=1)
 	reduce_df(df)
 
 	#Get difficulties for each item and join that.
@@ -83,11 +87,12 @@ def process_original():
 	df = df.merge(ts_cntr, right_on=['timestamp', 'user_id'], left_on=['timestamp', 'user_id'])
 
 	df = df.drop(['ts_user_x'], axis=1)
+	df = df.rename(columns={"ts_user_y" : "ts_user"})
 
 	assign_colstring_to_num(df, 'lex_user')
-	assign_colstring_to_num(df, 'ts_user_y')
+	assign_colstring_to_num(df, 'ts_user')
 
 	df.loc[:, 'difficulty'] = df.loc[:, 'difficulty'].astype(np.float32)
 	reduce_df(df)
 
-	df.to_csv("data/cleaned.csv")
+	df.to_csv("data/cleaned.csv", index=False)
