@@ -3,6 +3,10 @@ import numpy as np
 
 
 
+
+
+
+
 def timestamp_to_session(x):
 	result = pd.DataFrame()
 	timestamps_sorted = np.unique(np.array(x['timestamp']))
@@ -96,3 +100,27 @@ def process_original():
 	reduce_df(df)
 
 	df.to_csv("data/cleaned.csv", index=False)
+
+
+def eval_thresh(df, counts, thresh):
+    above, below = sum(counts >= thresh), sum(counts  < thresh)
+    total = above + below
+    
+    excl = sum(counts[counts < thresh])
+    incl = sum(counts[counts >= thresh])
+    total2 = incl + excl
+    
+    print(f"For threshold {thresh} there are {100 * above/total:.2f}% lexemes above and {100 * below/total:.2f}% below\n")
+    print(f"There would be {100 * incl/total2:.2f}% of data included and {100 * excl/total2:.2f}% of data excluded")
+    
+def reduce_lexemes(df, amt):
+    """
+    Removes all rows of lexemes that appear less than a certain amount.
+    """
+    cnts = df.groupby('lexeme_id').count().loc[:, 'timestamp']
+    cnts_incl = cnts >= amt
+    cnts_incl = cnts_incl.index[cnts_incl]
+    cnts_incl = set(cnts_incl)
+    df = df[df.lexeme_id.isin(cnts_incl)]
+    return df, cnts_incl
+    
