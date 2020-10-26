@@ -221,11 +221,16 @@ class MLPPolicySL(MLPPolicy):
             self, observations, actions,
             adv_n=None, acs_labels_na=None, qvals=None
     ):
-        # TODO: update the policy and return the loss
-        tobservations = torch.from_numpy(observations).to(torch.float32)
-        result_ac = self.forward(tobservations)
+        tobservations = ptu.from_numpy(observations)
+        result_ac = self(tobservations)
         # pdb.set_trace()
-        loss = self.loss(result_ac, torch.from_numpy(actions).to(torch.float32))
+        if self.discrete:
+            # loss = self.loss(result_ac.rsample(), ptu.from_numpy(actions))
+            loss = -result_ac.log_prob(actions).sum()
+        else:
+            # loss = self.loss(result_ac, ptu.from_numpy(actions))
+            loss = -result_ac.log_prob(ptu.from_numpy(actions)).sum()
+            print(loss)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()

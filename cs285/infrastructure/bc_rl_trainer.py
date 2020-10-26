@@ -48,24 +48,21 @@ class RL_Trainer(object):
         MAX_VIDEO_LEN = self.params['ep_len']
 
         # Is this env continuous, or self.discrete?
-        discrete = True
+        discrete = False
         self.params['agent_params']['discrete'] = discrete
 
         # Observation and action sizes
-        # TODO: fix
-        ob_dim = self.env.observation_space.shape[0]
-        ac_dim = self.env.action_space.shape[0]
-        self.params['agent_params']['ac_dim'] = ac_dim
-        self.params['agent_params']['ob_dim'] = ob_dim
-
         self.paths = self.params['paths']
+        sample_path = self.paths[0]
+        self.params['agent_params']['ac_dim'] = sample_path['action'].shape[1]
+        self.params['agent_params']['ob_dim'] = sample_path['observation'].shape[1]
 
         #############
         ## AGENT
         #############
 
         agent_class = self.params['agent_class']
-        self.agent = agent_class(self.env, self.params['agent_params'])
+        self.agent = agent_class(None, self.params['agent_params'])
 
     def run_training_loop(self, n_iter, collect_policy, eval_policy,
                         initial_expertdata=None, relabel_with_expert=False,
