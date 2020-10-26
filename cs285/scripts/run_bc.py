@@ -30,24 +30,13 @@ class BC_Trainer(object):
 
         self.rl_trainer = RL_Trainer(self.params) ## HW1: you will modify this
 
-        #######################
-        ## LOAD EXPERT POLICY
-        #######################
-
-        print('Loading expert policy from...', self.params['expert_policy_file'])
-        # self.loaded_expert_policy = LoadedGaussianPolicy(self.params['expert_policy_file'])
-        self.loaded_expert_policy = None
-        print('Done restoring expert policy...')
 
     def run_training_loop(self):
 
         self.rl_trainer.run_training_loop(
-            n_iter=self.params['n_iter'],
-            initial_expertdata=self.params['expert_data'],
+            n_iter=1,
             collect_policy=self.rl_trainer.agent.actor,
-            eval_policy=self.rl_trainer.agent.actor,
-            relabel_with_expert=self.params['do_dagger'],
-            expert_policy=self.loaded_expert_policy,
+            eval_policy=self.rl_trainer.agent.actor
         )
 
 
@@ -91,24 +80,21 @@ def main():
     ### CREATE DIRECTORY FOR LOGGING
     ##################################
 
-    if args.do_dagger:
-        # Use this prefix when submitting. The auto-grader uses this prefix.
-        logdir_prefix = 'q2_'
-        assert args.n_iter>1, ('DAGGER needs more than 1 iteration (n_iter>1) of training, to iteratively query the expert and train (after 1st warmstarting from behavior cloning).')
-    else:
-        # Use this prefix when submitting. The auto-grader uses this prefix.
-        logdir_prefix = 'q1_'
-        assert args.n_iter==1, ('Vanilla behavior cloning collects expert data just once (n_iter=1)')
-
     ## directory for logging
     data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data')
     if not (os.path.exists(data_path)):
         os.makedirs(data_path)
-    logdir = logdir_prefix + args.exp_name + '_hlr_' + time.strftime("%d-%m-%Y_%H-%M-%S")
+    logdir = 'bc_' + args.exp_name + '_hlr_' + time.strftime("%d-%m-%Y_%H-%M-%S")
     logdir = os.path.join(data_path, logdir)
     params['logdir'] = logdir
     if not(os.path.exists(logdir)):
         os.makedirs(logdir)
+
+    # Setting up trajectories
+    df = pd.read_csv("../data/cleaned.csv")
+    # TODO: get paths either from file or preprocessing
+    paths = None
+    params['paths'] = paths
 
 
     ###################
