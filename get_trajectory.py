@@ -58,25 +58,25 @@ def get_traj(df, incl):
 			states[k][:, c_s + 2] = d
 
 
-
+	#Fill in table with initial counts and actions for each.
 	for r in df_first_lex.itertuples(index=False):
 		sess, usr, lex = r.session, r.user_id, r.lexeme_id
 		
 		h_seen, h_corr, s_seen = r.history_seen, r.history_correct, r.session_seen
+
+		m_sess = min_sess[usr]
+		row = sess - m_sess
 
 
 		c = lex_to_idx[lex]
 		c_s = c * 4
 
 		
-		#Fill in all rows with h_seen, h_corr and difficulty
+		#Fill in all rows with h_seen, h_corr and delta
 		#Will update by incrementing them.
 		states[usr][:, c_s] = h_seen
 		states[usr][:, c_s + 1] = h_corr
 		states[usr][:, c_s + 3] = np.arange(len(states[usr]))
-
-		
-		actions[usr][0, c] = s_seen
 		
 		
 	add_arr = np.array([0] * len(states[3][0, :]))
@@ -87,7 +87,7 @@ def get_traj(df, incl):
 		usr, sess, lex, s_seen, s_corr = r.user_id, r.session, \
 			r.lexeme_id, r.session_seen, r.session_correct
 		
-		m_sess, ma_sess = min_sess[usr], max_sess[usr]
+		m_sess = min_sess[usr]
 
 		
 		c = lex_to_idx[lex]
