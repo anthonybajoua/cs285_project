@@ -230,7 +230,7 @@ class MLPPolicySL(MLPPolicy):
         else:
             # loss = self.loss(result_ac, ptu.from_numpy(actions))
             loss = -result_ac.log_prob(ptu.from_numpy(actions)).sum()
-            print(loss)
+            print(self.loss())
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
