@@ -49,13 +49,15 @@ def get_traj(df, incl):
 		except:
 			break
 
-	#Fill in difficulties
+	#Fill in difficulties and deltas for 
+	#each lexeme (whether seen or not)
 	for k in states.keys():
 		for lex, d in dfclt.iteritems():
 			c = lex_to_idx[lex]
 			c_s = c * 4
 
 			states[k][:, c_s + 2] = d
+			states[k][:, c_s + 3] = np.arange(len(states[usr]))
 
 
 	#Fill in table with initial counts and actions for each.
@@ -76,7 +78,6 @@ def get_traj(df, incl):
 		#Will update by incrementing them.
 		states[usr][:, c_s] = h_seen
 		states[usr][:, c_s + 1] = h_corr
-		states[usr][:, c_s + 3] = np.arange(len(states[usr]))
 		
 		
 	add_arr = np.array([0] * len(states[3][0, :]))
