@@ -24,14 +24,14 @@ def reduce_df(data):
     for c in data.columns:
         if type(data.loc[idx, c]) != str:
             data.loc[:, c] = pd.to_numeric(data.loc[:, c], downcast='unsigned')
-            
-            
+
+
 def assign_colstring_to_num(df, col):
     '''
     Takes values in a column and maps them to 0,1 values.
     '''
     id_tbl = pd.DataFrame()
-    
+
     id_tbl.loc[:, col] = df.loc[:, col]
     id_tbl = id_tbl.drop_duplicates()
     id_tbl.loc[:, 'id'] = range(len(id_tbl))
@@ -59,7 +59,7 @@ def process_original():
 
 
 	#Save lexemes in different table. Downcast all data
-	df['lexeme_string'] = df.lexeme_string.map(lambda x: x[0: x.find('<')])  
+	df['lexeme_string'] = df.lexeme_string.map(lambda x: x[0: x.find('<')])
 	lex_map = df.loc[:, ['lexeme_id', 'lexeme_string']]
 	lex_map = lex_map.drop_duplicates()
 	lex_map.to_csv("data/lexeme_map.csv", index=False)
@@ -105,14 +105,14 @@ def process_original():
 def eval_thresh(df, counts, thresh):
     above, below = sum(counts >= thresh), sum(counts  < thresh)
     total = above + below
-    
+
     excl = sum(counts[counts < thresh])
     incl = sum(counts[counts >= thresh])
     total2 = incl + excl
-    
+
     print(f"For threshold {thresh} there are {100 * above/total:.2f}% lexemes above and {100 * below/total:.2f}% below\n")
     print(f"There would be {100 * incl/total2:.2f}% of data included and {100 * excl/total2:.2f}% of data excluded")
-    
+
 def reduce_lexemes(df, amt):
     """
     Removes all rows of lexemes that appear less than a certain amount.
@@ -123,4 +123,3 @@ def reduce_lexemes(df, amt):
     cnts_incl = set(cnts_incl)
     df = df[df.lexeme_id.isin(cnts_incl)]
     return df, cnts_incl
-    
