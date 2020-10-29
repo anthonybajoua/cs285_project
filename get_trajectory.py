@@ -80,8 +80,6 @@ def get_traj(df, incl):
 		states[usr][:, c_s + 1] = h_corr
 		
 		
-	add_arr = np.array([0] * len(states[3][0, :]))
-
 
 	l_sess = None
 	for r in df.itertuples(index=True):
@@ -106,10 +104,6 @@ def get_traj(df, incl):
 			pass
 		
 		
-		#Incremement sessions that aren't the min
-		if sess != l_sess:
-			l_sess = sess
-			states[usr][row, :] = states[usr][row, :] + add_arr
 		
 
 	return states, actions, idx_to_lex , lex_to_idx
