@@ -57,7 +57,7 @@ def get_traj(df, incl):
 			c_s = c * 4
 
 			states[k][:, c_s + 2] = d
-			states[k][:, c_s + 3] = np.arange(len(states[usr]))
+			states[k][:, c_s + 3] = np.arange(len(states[k]))
 
 
 	#Fill in table with initial counts and actions for each.
