@@ -3,6 +3,15 @@ import numpy as np
 
 
 
+def normalize(df, colname, inplace=True):
+  '''
+  Normalize colName in df.
+  '''
+  if not inplace:
+    df = df.copy()
+  df.loc[:, colname] = df.loc[:, colname].astype(np.float32)
+  df.loc[:, colname] -= df.loc[:, colname].mean()
+  df.loc[:, colname] /= df.loc[:, colname].std()
 
 
 
@@ -110,7 +119,7 @@ def eval_thresh(df, counts, thresh):
     incl = sum(counts[counts >= thresh])
     total2 = incl + excl
     
-    print(f"For threshold {thresh} there are {100 * above/total:.2f}% lexemes above and {100 * below/total:.2f}% below\n")
+    print(f"For threshold {thresh} there are {100 * above/total:.2f}% lexemes included and {100 * below/total:.2f}% excluded\n")
     print(f"There would be {100 * incl/total2:.2f}% of data included and {100 * excl/total2:.2f}% of data excluded")
     
 def reduce_lexemes(df, amt):

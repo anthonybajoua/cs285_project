@@ -65,6 +65,7 @@ def init_gpu(use_gpu=True, gpu_id=0):
     else:
         device = torch.device("cpu")
         print("GPU not detected. Defaulting to CPU.")
+    return device
 
 
 def set_device(gpu_id):
